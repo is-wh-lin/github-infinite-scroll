@@ -1,7 +1,6 @@
 import { ref, computed, readonly, onMounted, onUnmounted, nextTick } from 'vue';
-import type { UseInfiniteScrollReturn, Repository, APIError } from '../types';
+import type { UseInfiniteScrollReturn, Repository, APIError } from '../../types';
 import { useGitHubAPI } from './useGitHubAPI';
-import { useState } from 'nuxt/app';
 
 /**
  * Infinite scroll composable with SSR-friendly state management
@@ -11,13 +10,13 @@ export const useInfiniteScroll = (
   initialRepositories: Repository[] = [],
   perPage: number = 10
 ): UseInfiniteScrollReturn => {
-  // Use useState for SSR-friendly reactive state
-  const repositories = useState<Repository[]>('infinite-scroll-repositories', () => [...initialRepositories]);
-  const currentPage = useState<number>('infinite-scroll-current-page', () => 1);
-  const loading = useState<boolean>('infinite-scroll-loading', () => false);
-  const error = useState<string | null>('infinite-scroll-error', () => null);
-  const hasMore = useState<boolean>('infinite-scroll-has-more', () => true);
-  const totalLoaded = useState<number>('infinite-scroll-total-loaded', () => initialRepositories.length);
+  // Use regular ref for client-side only state to avoid SSR hydration issues
+  const repositories = ref<Repository[]>([...initialRepositories]);
+  const currentPage = ref<number>(1);
+  const loading = ref<boolean>(false);
+  const error = ref<string | null>(null);
+  const hasMore = ref<boolean>(true);
+  const totalLoaded = ref<number>(initialRepositories.length);
   const isRetrying = ref(false);
   const retryCount = ref(0);
   const maxRetries = 3;
@@ -79,7 +78,7 @@ export const useInfiniteScroll = (
       error.value = apiError.message;
 
       // Don't set hasMore to false on error, allow retry
-      console.error('Failed to load more repositories:', apiError);
+      // Error is already stored in error.value for UI display
     } finally {
       loading.value = false;
     }
@@ -111,10 +110,9 @@ export const useInfiniteScroll = (
       error.value = apiError.message;
 
       // If we haven't reached max retries, allow another retry
-      if (retryCount.value < maxRetries) {
-        console.warn(`Retry ${retryCount.value} failed, ${maxRetries - retryCount.value} attempts remaining`);
-      } else {
-        console.error('Max retry attempts reached');
+      if (retryCount.value >= maxRetries) {
+        // Max retry attempts reached, error is already in error.value
+        hasMore.value = false;
       }
     } finally {
       isRetrying.value = false;
@@ -141,7 +139,7 @@ export const useInfiniteScroll = (
   const handleIntersection = (entries: IntersectionObserverEntry[]): void => {
     const [entry] = entries;
 
-    if (entry.isIntersecting && hasMore.value && !loading.value && !error.value) {
+    if (entry && entry.isIntersecting && hasMore.value && !loading.value && !error.value) {
       // Use nextTick to ensure DOM updates are complete
       nextTick(() => {
         loadMore();
@@ -212,11 +210,11 @@ export const useInfiniteScroll = (
   }
 
   return {
-    repositories,
+    repositories: readonly(repositories),
     loading: isLoadingOrRetrying,
-    error,
-    hasMore,
-    totalLoaded,
+    error: readonly(error),
+    hasMore: readonly(hasMore),
+    totalLoaded: readonly(totalLoaded),
     loadMore,
     retry,
     reset,
@@ -225,7 +223,7 @@ export const useInfiniteScroll = (
     stopObserving,
     canRetry,
     shouldShowEndMessage,
-    retryCount,
+    retryCount: readonly(retryCount),
     maxRetries,
   };
 };

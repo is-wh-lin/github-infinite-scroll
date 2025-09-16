@@ -49,11 +49,11 @@ export interface AppState {
  * Return type for useInfiniteScroll composable
  */
 export interface UseInfiniteScrollReturn {
-  repositories: Ref<Repository[]>;
+  repositories: Readonly<Ref<readonly Repository[]>>;
   loading: Ref<boolean>;
-  error: Ref<string | null>;
-  hasMore: Ref<boolean>;
-  totalLoaded: Ref<number>;
+  error: Readonly<Ref<string | null>>;
+  hasMore: Readonly<Ref<boolean>>;
+  totalLoaded: Readonly<Ref<number>>;
   loadMore: () => Promise<void>;
   retry: () => Promise<void>;
   reset: () => void;

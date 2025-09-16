@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref, readonly } from 'vue';
-import type { Repository } from '../../types';
+import type { Repository } from '../../../types';
 
 // Mock Vue's ref and readonly
 vi.mock('vue', () => ({
@@ -20,7 +20,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal('$fetch', mockFetch);
 
 // Import the composable after mocking
-const { useGitHubAPI } = await import('../../composables/useGitHubAPI');
+import { useGitHubAPI } from '../../composables/useGitHubAPI';
 
 // Mock repository data
 const mockRepository: Repository = {
@@ -59,7 +59,8 @@ describe('useGitHubAPI', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset ref mock to return proper reactive objects
-    vi.mocked(ref).mockImplementation((value) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (vi.mocked(ref) as any).mockImplementation((value: unknown) => {
       const mockRef = {
         value,
         __v_isRef: true,
@@ -79,7 +80,7 @@ describe('useGitHubAPI', () => {
     it('should fetch repositories successfully with default parameters', async () => {
       mockFetch.mockResolvedValueOnce(mockRepositories);
 
-      const result = await api.fetchRepositories();
+      const result = await api.fetchRepositories(1, 30);
 
       expect(mockFetch).toHaveBeenCalledWith('/orgs/openai/repos', {
         baseURL: 'https://api.github.com',
@@ -90,7 +91,7 @@ describe('useGitHubAPI', () => {
         },
         params: {
           page: 1,
-          per_page: 10,
+          per_page: 30,
           sort: 'created',
           direction: 'desc',
           type: 'public',
@@ -170,7 +171,7 @@ describe('useGitHubAPI', () => {
       networkError.name = 'TypeError';
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'network_error',
         message: 'Network error. Please check your internet connection and try again.',
       });
@@ -186,7 +187,7 @@ describe('useGitHubAPI', () => {
       };
       mockFetch.mockRejectedValueOnce(rateLimitError);
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'rate_limit_exceeded',
         message: 'GitHub API rate limit exceeded. Please try again later.',
         statusCode: 403,
@@ -202,7 +203,7 @@ describe('useGitHubAPI', () => {
       };
       mockFetch.mockRejectedValueOnce(notFoundError);
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'api_error',
         message: 'Repository not found or organization does not exist.',
         statusCode: 404,
@@ -212,7 +213,7 @@ describe('useGitHubAPI', () => {
     it('should handle invalid API response format', async () => {
       mockFetch.mockResolvedValueOnce('invalid response');
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'validation_error',
         message: 'Invalid request parameters.',
         statusCode: 422,
@@ -233,11 +234,11 @@ describe('useGitHubAPI', () => {
 
       mockFetch.mockResolvedValueOnce(mixedData);
 
-      const result = await api.fetchRepositories();
+      const result = await api.fetchRepositories(1, 30);
 
       expect(result.data).toHaveLength(2);
       expect(result.data[0]).toEqual(mockRepository);
-      expect(result.data[1].name).toBe('valid-repo-2');
+      expect(result.data[1]?.name).toBe('valid-repo-2');
     });
 
     it('should set loading state correctly', async () => {
@@ -248,7 +249,7 @@ describe('useGitHubAPI', () => {
 
       mockFetch.mockReturnValueOnce(promise);
 
-      const fetchPromise = api.fetchRepositories();
+      const fetchPromise = api.fetchRepositories(1, 30);
 
       expect(api.isLoading.value).toBe(true);
 
@@ -274,7 +275,7 @@ describe('useGitHubAPI', () => {
         return Promise.resolve(mockRepositories);
       });
 
-      await api.fetchRepositories();
+      await api.fetchRepositories(1, 30);
 
       expect(api.rateLimitRemaining.value).toBe(59);
       expect(api.rateLimitReset.value).toEqual(new Date(1640995200 * 1000));
@@ -306,7 +307,7 @@ describe('useGitHubAPI', () => {
       };
       mockFetch.mockRejectedValueOnce(serverError);
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'api_error',
         message: 'GitHub API is temporarily unavailable. Please try again later.',
         statusCode: 500,
@@ -317,7 +318,7 @@ describe('useGitHubAPI', () => {
       const unknownError = new Error('Something went wrong');
       mockFetch.mockRejectedValueOnce(unknownError);
 
-      await expect(api.fetchRepositories()).rejects.toMatchObject({
+      await expect(api.fetchRepositories(1, 30)).rejects.toMatchObject({
         type: 'unknown_error',
         message: 'An unexpected error occurred',
       });

@@ -1,11 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { nextTick } from 'vue';
-import type { Repository, GitHubAPIResponse, APIError } from '../../types';
+import { nextTick, ref } from 'vue';
+import type { Repository, GitHubAPIResponse, APIError } from '../../../types';
 
 // Mock the useGitHubAPI composable
 const mockFetchRepositories = vi.fn();
+const mockUseState = vi.fn((key: string, init: () => unknown): unknown => {
+  return ref(init());
+});
+
 vi.mock('../../composables/useGitHubAPI', () => ({
-  useGitHubAPI: () => ({
+  useGitHubAPI: (): unknown => ({
     fetchRepositories: mockFetchRepositories,
     isLoading: { value: false },
     error: { value: null },
@@ -14,19 +18,12 @@ vi.mock('../../composables/useGitHubAPI', () => ({
   }),
 }));
 
-// Mock Nuxt's useState with a proper reactive implementation
-import { ref } from 'vue';
-
-const mockUseState = vi.fn((key: string, init: () => any) => {
-  return ref(init());
-});
-
 vi.mock('#app', () => ({
   useState: mockUseState,
 }));
 
 // Make useState available globally for the composable
-global.useState = mockUseState;
+(global as Record<string, unknown>).useState = mockUseState;
 
 // Mock IntersectionObserver
 const mockIntersectionObserver = vi.fn();
@@ -69,13 +66,13 @@ const createMockRepository = (id: number): Repository => ({
 const mockRepositories = Array.from({ length: 10 }, (_, i) => createMockRepository(i + 1));
 
 describe('useInfiniteScroll', () => {
-  beforeEach(() => {
+  beforeEach((): void => {
     vi.clearAllMocks();
     // Set test environment
     process.env.NODE_ENV = 'test';
   });
 
-  afterEach(() => {
+  afterEach((): void => {
     vi.restoreAllMocks();
   });
 
@@ -308,25 +305,33 @@ describe('useInfiniteScroll', () => {
     });
 
     it('should show end message when appropriate', async () => {
-      const { useInfiniteScroll } = await import('../../composables/useInfiniteScroll');
-      const { shouldShowEndMessage, hasMore, totalLoaded, loading } = useInfiniteScroll();
+      // Create a scenario where we have loaded 30+ repositories and no more data
+      const initialRepos = Array.from({ length: 30 }, (_, i) => createMockRepository(i + 1));
 
-      // Initially should not show end message
+      const mockResponse: GitHubAPIResponse = {
+        data: [],
+        hasMore: false, // No more data from API
+        nextPage: null,
+        totalCount: 0,
+      };
+
+      mockFetchRepositories.mockResolvedValueOnce(mockResponse);
+
+      const { useInfiniteScroll } = await import('../../composables/useInfiniteScroll');
+      const { shouldShowEndMessage, hasMore, totalLoaded, loading, loadMore } = useInfiniteScroll(initialRepos);
+
+      // Initially should not show end message (we have more data to load)
       expect(shouldShowEndMessage.value).toBe(false);
 
-      // Set conditions for showing end message
-      hasMore.value = false;
-      totalLoaded.value = 30;
-
-      // Ensure loading is false
-      expect(loading.value).toBe(false);
+      // Load more to trigger the end condition
+      await loadMore();
 
       // Wait for computed to update
       await nextTick();
 
       // Check the conditions
       expect(hasMore.value).toBe(false);
-      expect(totalLoaded.value > 0).toBe(true);
+      expect(totalLoaded.value).toBe(30); // Should have 30 repositories
       expect(loading.value).toBe(false);
 
       expect(shouldShowEndMessage.value).toBe(true);
@@ -337,7 +342,7 @@ describe('useInfiniteScroll', () => {
     it('should handle missing IntersectionObserver gracefully', async () => {
       // Temporarily remove IntersectionObserver
       const originalIntersectionObserver = window.IntersectionObserver;
-      delete (window as any).IntersectionObserver;
+      delete (window as unknown as Record<string, unknown>).IntersectionObserver;
 
       const { useInfiniteScroll } = await import('../../composables/useInfiniteScroll');
       expect(() => {

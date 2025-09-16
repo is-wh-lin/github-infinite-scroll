@@ -6,7 +6,7 @@ import type {
   GitHubAPIParams,
   APIError,
   APIErrorType,
-} from '../types';
+} from '../../types';
 
 /**
  * GitHub API integration composable
@@ -23,18 +23,21 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
    * Validates a repository object against expected schema
    */
   const validateRepository = (repo: unknown): repo is Repository => {
+    if (typeof repo !== 'object' || repo === null) {
+      return false;
+    }
+
+    const r = repo as Record<string, unknown>;
     return (
-      typeof repo === 'object' &&
-      repo !== null &&
-      typeof repo.id === 'number' &&
-      typeof repo.name === 'string' &&
-      typeof repo.full_name === 'string' &&
-      (typeof repo.description === 'string' || repo.description === null) &&
-      typeof repo.html_url === 'string' &&
-      typeof repo.created_at === 'string' &&
-      typeof repo.updated_at === 'string' &&
-      typeof repo.stargazers_count === 'number' &&
-      (typeof repo.language === 'string' || repo.language === null)
+      typeof r.id === 'number' &&
+      typeof r.name === 'string' &&
+      typeof r.full_name === 'string' &&
+      (typeof r.description === 'string' || r.description === null) &&
+      typeof r.html_url === 'string' &&
+      typeof r.created_at === 'string' &&
+      typeof r.updated_at === 'string' &&
+      typeof r.stargazers_count === 'number' &&
+      (typeof r.language === 'string' || r.language === null)
     );
   };
 
@@ -46,13 +49,15 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
     let message = 'An unexpected error occurred';
     let retryAfter: number | undefined;
 
+    const errorObj = error as Record<string, unknown>;
+
     if (statusCode) {
       switch (statusCode) {
         case 403:
-          if (error?.message?.includes('rate limit')) {
+          if (errorObj?.message && typeof errorObj.message === 'string' && errorObj.message.includes('rate limit')) {
             type = 'rate_limit_exceeded';
             message = 'GitHub API rate limit exceeded. Please try again later.';
-            retryAfter = error?.retryAfter;
+            retryAfter = typeof errorObj.retryAfter === 'number' ? errorObj.retryAfter : undefined;
           } else {
             type = 'api_error';
             message = 'Access forbidden. Please check API permissions.';
@@ -76,15 +81,21 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
         default:
           if (statusCode >= 400 && statusCode < 500) {
             type = 'api_error';
-            message = `Client error: ${error?.message || 'Invalid request'}`;
+            message = `Client error: ${
+              (typeof errorObj?.message === 'string' ? errorObj.message : null) || 'Invalid request'
+            }`;
           } else if (statusCode >= 500) {
             type = 'api_error';
-            message = `Server error: ${error?.message || 'Internal server error'}`;
+            message = `Server error: ${
+              (typeof errorObj?.message === 'string' ? errorObj.message : null) || 'Internal server error'
+            }`;
           }
       }
-    } else if (error?.name === 'TypeError' || error?.code === 'NETWORK_ERROR') {
-      type = 'network_error';
-      message = 'Network error. Please check your internet connection and try again.';
+    } else {
+      if (errorObj?.name === 'TypeError' || errorObj?.code === 'NETWORK_ERROR') {
+        type = 'network_error';
+        message = 'Network error. Please check your internet connection and try again.';
+      }
     }
 
     return {
@@ -92,7 +103,7 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       message,
       statusCode,
       retryAfter,
-      details: error,
+      details: error as Record<string, unknown>,
     };
   };
 
@@ -189,12 +200,13 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       // Handle different types of errors
       let apiError: APIError;
 
-      if (err.type) {
+      const errorObj = err as Record<string, unknown>;
+      if (errorObj.type) {
         // Already a structured API error
-        apiError = err;
+        apiError = err as APIError;
       } else {
         // Create structured error from unknown error
-        apiError = createAPIError(err, err.statusCode);
+        apiError = createAPIError(err, typeof errorObj.statusCode === 'number' ? errorObj.statusCode : undefined);
       }
 
       error.value = apiError.message;
