@@ -57,6 +57,13 @@ export interface UseInfiniteScrollReturn {
   loadMore: () => Promise<void>;
   retry: () => Promise<void>;
   reset: () => void;
+  // Additional utilities for components
+  startObserving: (element: HTMLElement) => void;
+  stopObserving: () => void;
+  canRetry: Ref<boolean>;
+  shouldShowEndMessage: Ref<boolean>;
+  retryCount: Ref<number>;
+  maxRetries: number;
 }
 
 /**
