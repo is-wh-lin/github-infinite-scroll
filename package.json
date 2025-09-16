@@ -10,7 +10,9 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "type-check": "nuxt typecheck"
+    "type-check": "nuxt typecheck",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@nuxt/eslint": "^1.9.0",
@@ -21,5 +23,10 @@
     "typescript": "^5.9.2",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^3.2.4",
+    "happy-dom": "^18.0.1",
+    "vitest": "^3.2.4"
   }
 }
