@@ -1,85 +1,134 @@
 # GitHub Infinite Scroll
 
-A Nuxt 4 application that displays OpenAI's GitHub repositories with infinite scroll functionality.
+A modern Nuxt 4 application that displays OpenAI's GitHub repositories with infinite scroll functionality.
 
-## Features
+## Core Features
 
-- Infinite scroll for seamless browsing experience
-- TypeScript support for type safety
-- ESLint configuration for code quality
-- Responsive design for various screen sizes
-- Error handling and loading states
+- **Infinite Scroll** - Seamless browsing experience with automatic loading of more repositories
+- **GitHub API Integration** - Real-time fetching of OpenAI organization repository data
+- **Responsive Design** - Support for various screen sizes and devices
+- **TypeScript** - Complete type safety support
+- **Error Handling** - Comprehensive error states and user feedback
+- **Loading States** - Visual indicators for data loading operations
+- **Rate Limit Management** - Graceful handling of GitHub API rate limits
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Technology Stack
 
-## Setup
+- **Nuxt 4** - Vue.js meta-framework with SSR enabled
+- **Vue 3** - Frontend framework using Composition API
+- **TypeScript** - Strict type checking
+- **Nuxt UI** - Consistent design system
+- **Vitest** - Modern testing framework
+- **ESLint** - Code quality assurance
 
-Make sure to install dependencies:
+## Project Structure
 
-```bash
-# npm
-npm install
+```
+app/
+├── components/     # Vue components
+├── composables/    # Composition functions
+├── pages/         # File-based routing
+└── tests/         # Test files
 
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+types/             # TypeScript type definitions
+public/            # Static assets
 ```
 
-## Development Server
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Configuration
+
+Create a `.env` file and configure GitHub Token (optional, for higher API rate limits):
+
+```bash
+# .env
+GITHUB_TOKEN=your_github_personal_access_token
+GITHUB_API_BASE_URL=https://api.github.com
+```
+
+## Development
+
+### Development Server
 
 Start the development server on `http://localhost:3000`:
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+### Code Quality
 
 ```bash
-# npm
+# Run ESLint checks
+npm run lint
+
+# Auto-fix ESLint issues
+npm run lint:fix
+
+# TypeScript type checking
+npm run type-check
+```
+
+### Testing
+
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once
+npm run test:run
+```
+
+## Build and Deployment
+
+### Production Build
+
+```bash
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+### Preview Production Build
 
 ```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### Static Site Generation
+
+```bash
+npm run generate
+```
+
+## API Integration
+
+This application uses the GitHub REST API v4 to fetch OpenAI organization repository data. Key features include:
+
+- Paginated repository list loading
+- Rate limit monitoring
+- Error handling and retry mechanisms
+- Data validation and type safety
+
+## Testing Strategy
+
+- **Unit Tests** - Composables and utility functions
+- **Component Tests** - Vue component behavior and rendering
+- **Integration Tests** - API integration and data flow
+- **Type Tests** - TypeScript type definition validation
+
+## Documentation
+
+- [Nuxt 4 Documentation](https://nuxt.com/docs)
+- [Vue 3 Documentation](https://vuejs.org/)
+- [GitHub API Documentation](https://docs.github.com/en/rest)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
