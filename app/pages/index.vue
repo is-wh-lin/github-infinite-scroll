@@ -12,10 +12,14 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner" />
-        <p>Loading repositories...</p>
-      </div>
+      <LoadingIndicator
+        v-if="loading"
+        variant="skeleton"
+        :skeleton-count="3"
+        loading-text="Loading repositories..."
+        aria-label="Loading GitHub repositories"
+        screen-reader-text="Loading OpenAI repositories, please wait"
+      />
 
       <!-- Error State -->
       <div v-if="error" class="error-state">
@@ -38,6 +42,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useInfiniteScroll } from '../composables/useInfiniteScroll';
 import RepositoryItem from '../components/Repository/RepositoryItem.vue';
+import LoadingIndicator from '../components/UI/LoadingIndicator.vue';
 import { useHead } from 'nuxt/app';
 
 // Define component name for Vue DevTools
@@ -134,38 +139,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  gap: 1rem;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e1e4e8;
-  border-top: 3px solid #0366d6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-state p {
-  color: #656d76;
-  margin: 0;
-  font-size: 1rem;
 }
 
 .error-state {
@@ -280,13 +253,6 @@ onUnmounted(() => {
   .error-state {
     background: #2d1b1b;
     border-color: #6f2c2c;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .loading-spinner {
-    animation: none;
   }
 }
 </style>

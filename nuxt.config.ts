@@ -5,4 +5,17 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/test-utils', '@nuxt/ui'],
   // Temporarily disable SSR to avoid hydration issues during development
   ssr: false,
+
+  // Runtime configuration for environment variables
+  runtimeConfig: {
+    // Private keys (only available on server-side)
+    githubToken: process.env.GITHUB_TOKEN,
+
+    // Public keys (exposed to client-side)
+    public: {
+      githubApiBaseUrl: process.env.GITHUB_API_BASE_URL || 'https://api.github.com',
+      // Only expose token to client if explicitly set as public (not recommended for production)
+      githubToken: process.env.NUXT_PUBLIC_GITHUB_TOKEN,
+    },
+  },
 });

@@ -130,14 +130,26 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
         type: 'public',
       };
 
+      // Get runtime config for API credentials
+      const config = useRuntimeConfig();
+      const githubToken = config.public.githubToken || config.githubToken;
+
+      // Prepare headers with optional authentication
+      const headers: Record<string, string> = {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'GitHub-Infinite-Scroll-App',
+      };
+
+      // Add authorization header if token is available
+      if (githubToken) {
+        headers.Authorization = `Bearer ${githubToken}`;
+      }
+
       // Use $fetch directly for API calls with proper headers
       const data = await $fetch<Repository[]>('/orgs/openai/repos', {
-        baseURL: 'https://api.github.com',
-        headers: {
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'User-Agent': 'GitHub-Infinite-Scroll-App',
-        },
+        baseURL: config.public.githubApiBaseUrl || 'https://api.github.com',
+        headers,
         params,
         onResponse({ response }) {
           // Extract rate limit information from headers
