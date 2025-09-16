@@ -1,5 +1,10 @@
 # GitHub Infinite Scroll
 
+[![Deploy to GitHub Pages](https://github.com/is-wh-lin/github-infinite-scroll/actions/workflows/deploy.yml/badge.svg)](https://github.com/is-wh-lin/github-infinite-scroll/actions/workflows/deploy.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://is-wh-lin.github.io/github-infinite-scroll)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/is-wh-lin/github-infinite-scroll/deploy.yml?branch=main&label=Build)](https://github.com/is-wh-lin/github-infinite-scroll/actions)
+[![Last Deployment](https://img.shields.io/github/last-commit/is-wh-lin/github-infinite-scroll/gh-pages?label=Last%20Deployment)](https://github.com/is-wh-lin/github-infinite-scroll/commits/gh-pages)
+
 A modern Nuxt 4 application that displays OpenAI's GitHub repositories with infinite scroll functionality.
 
 ## Core Features
@@ -49,13 +54,15 @@ npm install
 
 ### Environment Configuration
 
-Create a `.env` file and configure GitHub Token (optional, for higher API rate limits):
+The application works without any environment configuration for public repositories. For development with higher API rate limits, you can optionally configure:
 
 ```bash
-# .env
+# .env (optional)
 GITHUB_TOKEN=your_github_personal_access_token
 GITHUB_API_BASE_URL=https://api.github.com
 ```
+
+**Note**: For production deployment on GitHub Pages, no token is required as the app uses unauthenticated GitHub API access for public repositories.
 
 ## Development
 
@@ -109,6 +116,69 @@ npm run preview
 ```bash
 npm run generate
 ```
+
+### GitHub Pages Deployment
+
+This application is automatically deployed to GitHub Pages using GitHub Actions. The deployment process includes:
+
+- **Automatic Deployment**: Triggered on every push to the `main` branch
+- **Manual Deployment**: Available through GitHub Actions with customizable options
+- **Status Monitoring**: Real-time deployment status and history tracking
+
+#### Deployment Status
+
+- **Live Site**: [View Application](https://is-wh-lin.github.io/github-infinite-scroll)
+- **Deployment History**: [View Actions](https://github.com/is-wh-lin/github-infinite-scroll/actions/workflows/deploy.yml)
+- **Build Logs**: Available in GitHub Actions for troubleshooting
+
+#### Manual Deployment
+
+To trigger a manual deployment:
+
+1. Go to the [Actions tab](https://github.com/is-wh-lin/github-infinite-scroll/actions/workflows/deploy.yml)
+2. Click "Run workflow"
+3. Configure deployment options:
+   - **Branch**: Select branch to deploy (default: main)
+   - **Environment**: Choose deployment environment
+   - **Message**: Add custom deployment message
+   - **Force Deploy**: Overwrite existing deployment
+   - **Skip Cache**: Force fresh build without cache
+
+#### Deployment Status Monitoring
+
+Monitor deployment status using multiple methods:
+
+**Status Badges**: Check the badges at the top of this README for quick status overview
+
+**Command Line**: Use the built-in status checker
+
+```bash
+npm run deployment:status
+```
+
+**GitHub Interface**:
+
+- [Actions Tab](https://github.com/is-wh-lin/github-infinite-scroll/actions) - View all workflow runs
+- [Deployments](https://github.com/is-wh-lin/github-infinite-scroll/deployments) - Track deployment history
+- [Pages Settings](https://github.com/is-wh-lin/github-infinite-scroll/settings/pages) - Configure GitHub Pages
+
+#### Quick Troubleshooting
+
+If deployment fails, check:
+
+1. **Build Logs**: Review the GitHub Actions workflow logs
+2. **Environment Variables**: Ensure all required secrets are configured
+3. **Branch Status**: Verify the target branch exists and has recent commits
+4. **Repository Settings**: Check GitHub Pages settings in repository configuration
+
+**Common Issues**:
+
+- Build failures: Check Node.js version compatibility and dependency issues
+- Permission errors: Verify GitHub Actions has Pages write permissions
+- Site not accessible: Allow time for DNS propagation (up to 10 minutes)
+- Asset loading issues: Check base URL configuration in `nuxt.config.ts`
+
+For detailed troubleshooting steps, see the [Troubleshooting Reference](docs.local/github-pages-troubleshooting-reference.md).
 
 ## API Integration
 

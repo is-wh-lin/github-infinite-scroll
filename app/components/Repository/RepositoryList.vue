@@ -53,7 +53,7 @@
           <h3 class="repository-list__end-title">End of repositories</h3>
           <p class="repository-list__end-text">
             You've reached the end of OpenAI's public repositories.
-            <br />
+            <br >
             Total repositories loaded: {{ totalLoaded }}
           </p>
         </div>

@@ -342,7 +342,6 @@ describe('ErrorMessage', () => {
       await wrapper.setProps({ message: 'New error message' });
 
       // Should reset hasRetried and update announcement
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((wrapper.vm as any).hasRetried).toBe(false);
     });
 

@@ -130,13 +130,10 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
         type: 'public',
       };
 
-      // Get runtime config for API credentials
+      // Get runtime config for API credentials and environment settings
       const config = useRuntimeConfig();
       const githubToken = config.public.githubToken || config.githubToken;
-
-      // Debug: Log token availability (remove in production)
-      // console.log('GitHub Token available:', !!githubToken);
-      // console.log('Token prefix:', githubToken ? githubToken.substring(0, 10) + '...' : 'No token');
+      const rateLimitConfig = config.public.apiRateLimit;
 
       // Prepare headers with optional authentication
       const headers: Record<string, string> = {
@@ -146,14 +143,13 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       };
 
       // Add authorization header if token is available
-      if (githubToken) {
+      // For static sites, avoid using tokens to prevent security issues
+      if (githubToken && process.server) {
         headers.Authorization = `Bearer ${githubToken}`;
-        // console.log('Authorization header added');
-      } else {
-        // console.warn('No GitHub token available - using unauthenticated requests');
       }
 
-      // Use $fetch directly for API calls with proper headers
+      // Use GitHub API directly without authentication for public repositories
+      // This provides 60 requests per hour per IP address
       const data = await $fetch<Repository[]>('/orgs/openai/repos', {
         baseURL: config.public.githubApiBaseUrl || 'https://api.github.com',
         headers,
@@ -162,7 +158,6 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
           // Extract rate limit information from headers
           const remaining = response.headers.get('x-ratelimit-remaining');
           const reset = response.headers.get('x-ratelimit-reset');
-          const _limit = response.headers.get('x-ratelimit-limit');
 
           if (remaining) {
             rateLimitRemaining.value = parseInt(remaining, 10);
@@ -171,14 +166,6 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
           if (reset) {
             rateLimitReset.value = new Date(parseInt(reset, 10) * 1000);
           }
-
-          // Debug: Log rate limit info to verify authentication
-          // console.log('Rate Limit Info:', {
-          //   limit: limit ? parseInt(limit, 10) : 'unknown',
-          //   remaining: remaining ? parseInt(remaining, 10) : 'unknown',
-          //   reset: reset ? new Date(parseInt(reset, 10) * 1000).toLocaleString() : 'unknown',
-          //   authenticated: limit ? parseInt(limit, 10) > 60 : false, // GitHub gives 5000/hour for authenticated, 60/hour for unauthenticated
-          // });
         },
         onResponseError({ response }) {
           // Handle rate limiting specifically

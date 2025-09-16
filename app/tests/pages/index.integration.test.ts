@@ -50,7 +50,6 @@ vi.mock('nuxt/app', () => ({
 }));
 
 // Mock global $fetch
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).$fetch = mock$fetch;
 
 // Create a test version of the component without top-level await
