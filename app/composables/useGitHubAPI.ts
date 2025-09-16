@@ -134,6 +134,10 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       const config = useRuntimeConfig();
       const githubToken = config.public.githubToken || config.githubToken;
 
+      // Debug: Log token availability (remove in production)
+      console.log('GitHub Token available:', !!githubToken);
+      console.log('Token prefix:', githubToken ? githubToken.substring(0, 10) + '...' : 'No token');
+
       // Prepare headers with optional authentication
       const headers: Record<string, string> = {
         Accept: 'application/vnd.github+json',
@@ -144,6 +148,9 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       // Add authorization header if token is available
       if (githubToken) {
         headers.Authorization = `Bearer ${githubToken}`;
+        console.log('Authorization header added');
+      } else {
+        console.warn('No GitHub token available - using unauthenticated requests');
       }
 
       // Use $fetch directly for API calls with proper headers
@@ -155,6 +162,7 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
           // Extract rate limit information from headers
           const remaining = response.headers.get('x-ratelimit-remaining');
           const reset = response.headers.get('x-ratelimit-reset');
+          const limit = response.headers.get('x-ratelimit-limit');
 
           if (remaining) {
             rateLimitRemaining.value = parseInt(remaining, 10);
@@ -163,6 +171,14 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
           if (reset) {
             rateLimitReset.value = new Date(parseInt(reset, 10) * 1000);
           }
+
+          // Debug: Log rate limit info to verify authentication
+          console.log('Rate Limit Info:', {
+            limit: limit ? parseInt(limit, 10) : 'unknown',
+            remaining: remaining ? parseInt(remaining, 10) : 'unknown',
+            reset: reset ? new Date(parseInt(reset, 10) * 1000).toLocaleString() : 'unknown',
+            authenticated: limit ? parseInt(limit, 10) > 60 : false, // GitHub gives 5000/hour for authenticated, 60/hour for unauthenticated
+          });
         },
         onResponseError({ response }) {
           // Handle rate limiting specifically

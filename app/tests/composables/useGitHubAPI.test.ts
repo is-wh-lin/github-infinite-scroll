@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ref, readonly } from 'vue';
 import type { Repository } from '../../../types';
+import { useGitHubAPI } from '../../composables/useGitHubAPI';
 
 // Mock Vue's ref and readonly
 vi.mock('vue', () => ({
-  ref: vi.fn((value) => {
+  ref: vi.fn((initialValue) => {
     const mockRef = {
-      value,
+      value: initialValue,
       __v_isRef: true,
       [Symbol.for('__v_isRef')]: true,
     };
@@ -19,8 +19,15 @@ vi.mock('vue', () => ({
 const mockFetch = vi.fn();
 vi.stubGlobal('$fetch', mockFetch);
 
-// Import the composable after mocking
-import { useGitHubAPI } from '../../composables/useGitHubAPI';
+// Mock useRuntimeConfig
+const mockUseRuntimeConfig = vi.fn(() => ({
+  public: {
+    githubToken: 'mock-token',
+    githubApiBaseUrl: 'https://api.github.com',
+  },
+  githubToken: 'mock-token',
+}));
+vi.stubGlobal('useRuntimeConfig', mockUseRuntimeConfig);
 
 // Mock repository data
 const mockRepository: Repository = {
@@ -58,17 +65,16 @@ describe('useGitHubAPI', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset ref mock to return proper reactive objects
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (vi.mocked(ref) as any).mockImplementation((value: unknown) => {
-      const mockRef = {
-        value,
-        __v_isRef: true,
-        [Symbol.for('__v_isRef')]: true,
-      };
-      return mockRef;
+
+    // Reset runtime config mock
+    mockUseRuntimeConfig.mockReturnValue({
+      public: {
+        githubToken: 'mock-token',
+        githubApiBaseUrl: 'https://api.github.com',
+      },
+      githubToken: 'mock-token',
     });
-    vi.mocked(readonly).mockImplementation((ref) => ref);
+
     api = useGitHubAPI();
   });
 
@@ -88,6 +94,7 @@ describe('useGitHubAPI', () => {
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28',
           'User-Agent': 'GitHub-Infinite-Scroll-App',
+          Authorization: 'Bearer mock-token',
         },
         params: {
           page: 1,
@@ -243,7 +250,7 @@ describe('useGitHubAPI', () => {
 
     it('should set loading state correctly', async () => {
       let resolvePromise: (value: Repository[]) => void;
-      const promise = new Promise((resolve) => {
+      const promise = new Promise<Repository[]>((resolve) => {
         resolvePromise = resolve;
       });
 
@@ -251,6 +258,7 @@ describe('useGitHubAPI', () => {
 
       const fetchPromise = api.fetchRepositories(1, 30);
 
+      // Check loading state immediately after starting fetch
       expect(api.isLoading.value).toBe(true);
 
       resolvePromise!(mockRepositories);

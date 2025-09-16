@@ -3,27 +3,27 @@
     <!-- Skeleton Loading Pattern -->
     <div v-if="variant === 'skeleton'" class="skeleton-container">
       <div v-for="n in skeletonCount" :key="n" class="skeleton-item">
-        <div class="skeleton-avatar"></div>
+        <div class="skeleton-avatar" />
         <div class="skeleton-content">
-          <div class="skeleton-title"></div>
-          <div class="skeleton-description"></div>
-          <div class="skeleton-meta"></div>
+          <div class="skeleton-title" />
+          <div class="skeleton-description" />
+          <div class="skeleton-meta" />
         </div>
       </div>
     </div>
 
     <!-- Spinner Loading Pattern -->
     <div v-else-if="variant === 'spinner'" class="spinner-container">
-      <div class="spinner" aria-hidden="true"></div>
+      <div class="spinner" aria-hidden="true" />
       <span class="loading-text">{{ loadingText }}</span>
     </div>
 
     <!-- Dots Loading Pattern -->
     <div v-else class="dots-container">
       <div class="dots" aria-hidden="true">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
+        <div class="dot" />
+        <div class="dot" />
+        <div class="dot" />
       </div>
       <span class="loading-text">{{ loadingText }}</span>
     </div>
@@ -42,7 +42,7 @@ interface Props {
   screenReaderText?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   variant: 'skeleton',
   skeletonCount: 3,
   loadingText: 'Loading repositories...',

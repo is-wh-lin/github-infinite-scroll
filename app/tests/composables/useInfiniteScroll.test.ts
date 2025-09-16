@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { nextTick, ref } from 'vue';
 import type { Repository, GitHubAPIResponse, APIError } from '../../../types';
 
+// Mock Vue lifecycle hooks
+vi.mock('vue', async () => {
+  const actual = await vi.importActual('vue');
+  return {
+    ...actual,
+    onMounted: vi.fn(),
+    onUnmounted: vi.fn(),
+  };
+});
+
 // Mock the useGitHubAPI composable
 const mockFetchRepositories = vi.fn();
 const mockUseState = vi.fn((key: string, init: () => unknown): unknown => {

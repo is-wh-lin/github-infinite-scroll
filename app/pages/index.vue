@@ -22,10 +22,15 @@
       />
 
       <!-- Error State -->
-      <div v-if="error" class="error-state">
-        <p class="error-message">{{ error }}</p>
-        <button v-if="canRetry" class="retry-button" @click="retry">Retry ({{ retryCount }}/{{ maxRetries }})</button>
-      </div>
+      <ErrorMessage
+        v-if="error"
+        :message="error"
+        :retryable="canRetry"
+        :retry-count="retryCount"
+        :max-retries="maxRetries"
+        :is-retrying="loading"
+        @retry="retry"
+      />
 
       <!-- End Message -->
       <div v-if="shouldShowEndMessage" class="end-message">
@@ -43,6 +48,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import { useInfiniteScroll } from '../composables/useInfiniteScroll';
 import RepositoryItem from '../components/Repository/RepositoryItem.vue';
 import LoadingIndicator from '../components/UI/LoadingIndicator.vue';
+import ErrorMessage from '../components/UI/ErrorMessage.vue';
 import { useHead } from 'nuxt/app';
 
 // Define component name for Vue DevTools
@@ -141,46 +147,6 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  gap: 1rem;
-  background: #fff5f5;
-  border: 1px solid #fed7d7;
-  border-radius: 8px;
-  margin: 1rem 0;
-}
-
-.error-message {
-  color: #c53030;
-  margin: 0;
-  text-align: center;
-  font-size: 1rem;
-}
-
-.retry-button {
-  background: #0366d6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.retry-button:hover {
-  background: #0256cc;
-}
-
-.retry-button:focus {
-  outline: 2px solid #0366d6;
-  outline-offset: 2px;
-}
-
 .end-message {
   text-align: center;
   padding: 2rem;
@@ -220,11 +186,6 @@ onUnmounted(() => {
   .page-header h1 {
     font-size: 1.75rem;
   }
-
-  .error-state,
-  .loading-state {
-    padding: 1.5rem;
-  }
 }
 
 /* Dark mode support */
@@ -248,11 +209,6 @@ onUnmounted(() => {
   .end-message {
     background: #161b22;
     color: #8b949e;
-  }
-
-  .error-state {
-    background: #2d1b1b;
-    border-color: #6f2c2c;
   }
 }
 </style>

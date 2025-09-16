@@ -14,8 +14,8 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       githubApiBaseUrl: process.env.GITHUB_API_BASE_URL || 'https://api.github.com',
-      // Only expose token to client if explicitly set as public (not recommended for production)
-      githubToken: process.env.NUXT_PUBLIC_GITHUB_TOKEN,
+      // Expose token to client for SPA mode (be careful in production)
+      githubToken: process.env.GITHUB_TOKEN,
     },
   },
 });
