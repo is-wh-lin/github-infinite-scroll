@@ -6,9 +6,9 @@ import type { Repository } from '../../../types/repository';
 
 // Mock the composables for integration tests
 const mockInfiniteScrollReturn = {
-  repositories: ref([]),
+  repositories: ref<Repository[]>([]),
   loading: ref(false),
-  error: ref(null),
+  error: ref<string | null>(null),
   hasMore: ref(true),
   totalLoaded: ref(0),
   loadMore: vi.fn(),
@@ -297,10 +297,10 @@ describe('RepositoryList Integration Tests', () => {
       wrapper = mount(RepositoryList);
       await nextTick();
 
-      // Should have main landmark
-      const main = wrapper.find('[role="main"]');
-      expect(main.exists()).toBe(true);
-      expect(main.attributes('aria-labelledby')).toBe('repository-list-title');
+      // Should have region landmark
+      const region = wrapper.find('[role="region"]');
+      expect(region.exists()).toBe(true);
+      expect(region.attributes('aria-labelledby')).toBe('repository-list-title');
 
       // Should have feed role for repository list
       const feed = wrapper.find('[role="feed"]');
@@ -308,8 +308,9 @@ describe('RepositoryList Integration Tests', () => {
       expect(feed.attributes('aria-label')).toBe('List of OpenAI repositories');
 
       // Should have proper heading
-      const heading = wrapper.find('h1#repository-list-title');
+      const heading = wrapper.find('h2#repository-list-title');
       expect(heading.exists()).toBe(true);
+      expect(heading.classes()).toContain('sr-only');
     });
 
     it('updates aria-busy during loading', async () => {

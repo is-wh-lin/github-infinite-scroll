@@ -342,7 +342,8 @@ describe('ErrorMessage', () => {
       await wrapper.setProps({ message: 'New error message' });
 
       // Should reset hasRetried and update announcement
-      expect(wrapper.vm.hasRetried).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((wrapper.vm as any).hasRetried).toBe(false);
     });
 
     it('updates button text when retry count changes', async () => {

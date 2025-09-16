@@ -3,8 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/test-utils', '@nuxt/ui'],
-  // Temporarily disable SSR to avoid hydration issues during development
-  ssr: false,
+  // Enable SSR for proper initial data loading
+  ssr: true,
 
   // Runtime configuration for environment variables
   runtimeConfig: {

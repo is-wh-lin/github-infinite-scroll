@@ -1,7 +1,7 @@
 <template>
-  <div class="repository-list" role="main" aria-labelledby="repository-list-title">
-    <!-- Main heading -->
-    <h1 id="repository-list-title" class="repository-list__title">OpenAI GitHub Repositories</h1>
+  <div class="repository-list" role="region" aria-labelledby="repository-list-title">
+    <!-- Screen reader title -->
+    <h2 id="repository-list-title" class="sr-only">Repository List</h2>
 
     <!-- Repository count and status -->
     <div class="repository-list__status" aria-live="polite" aria-atomic="false">
@@ -53,7 +53,7 @@
           <h3 class="repository-list__end-title">End of repositories</h3>
           <p class="repository-list__end-text">
             You've reached the end of OpenAI's public repositories.
-            <br >
+            <br />
             Total repositories loaded: {{ totalLoaded }}
           </p>
         </div>
@@ -241,14 +241,7 @@ defineExpose({
   min-height: 100vh;
 }
 
-.repository-list__title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 1rem 0;
-  text-align: center;
-  line-height: 1.2;
-}
+/* Title is now screen reader only, no visible styles needed */
 
 .repository-list__status {
   margin-bottom: 1.5rem;
@@ -397,10 +390,6 @@ defineExpose({
     padding: 0.75rem;
   }
 
-  .repository-list__title {
-    font-size: 1.75rem;
-  }
-
   .repository-list__items {
     gap: 0.75rem;
   }
@@ -414,10 +403,6 @@ defineExpose({
 @media (max-width: 480px) {
   .repository-list {
     padding: 0.5rem;
-  }
-
-  .repository-list__title {
-    font-size: 1.5rem;
   }
 
   .repository-list__end {
@@ -438,10 +423,6 @@ defineExpose({
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .repository-list__title {
-    color: #000000;
-  }
-
   .repository-list__end {
     border-color: #000000;
     background-color: #ffffff;
@@ -454,10 +435,6 @@ defineExpose({
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .repository-list__title {
-    color: #f9fafb;
-  }
-
   .repository-list__count {
     color: #9ca3af;
   }

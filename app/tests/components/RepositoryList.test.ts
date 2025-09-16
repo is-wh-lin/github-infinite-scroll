@@ -71,9 +71,9 @@ const mockRepositories = [
 
 // Mock the composables at the top level
 const mockInfiniteScrollReturn = {
-  repositories: ref([]),
+  repositories: ref<Repository[]>([]),
   loading: ref(false),
-  error: ref(null),
+  error: ref<string | null>(null),
   hasMore: ref(true),
   totalLoaded: ref(0),
   loadMore: vi.fn(),
@@ -121,12 +121,13 @@ describe('RepositoryList', () => {
   });
 
   describe('Component Rendering', () => {
-    it('renders the main title correctly', () => {
+    it('renders the screen reader title correctly', () => {
       wrapper = mount(RepositoryList);
 
-      const title = wrapper.find('[data-testid="repository-list-title"], .repository-list__title');
+      const title = wrapper.find('#repository-list-title');
       expect(title.exists()).toBe(true);
-      expect(title.text()).toContain('OpenAI GitHub Repositories');
+      expect(title.text()).toContain('Repository List');
+      expect(title.classes()).toContain('sr-only');
     });
 
     it('renders repository count status', () => {
@@ -149,9 +150,9 @@ describe('RepositoryList', () => {
     it('has proper ARIA attributes for accessibility', () => {
       wrapper = mount(RepositoryList);
 
-      const main = wrapper.find('[role="main"]');
-      expect(main.exists()).toBe(true);
-      expect(main.attributes('aria-labelledby')).toBe('repository-list-title');
+      const region = wrapper.find('[role="region"]');
+      expect(region.exists()).toBe(true);
+      expect(region.attributes('aria-labelledby')).toBe('repository-list-title');
 
       const feed = wrapper.find('[role="feed"]');
       expect(feed.exists()).toBe(true);
@@ -169,9 +170,9 @@ describe('RepositoryList', () => {
 
       const repositoryItems = wrapper.findAll('[data-testid^="repo-"]');
       expect(repositoryItems).toHaveLength(3);
-      expect(repositoryItems[0].text()).toContain('gpt-3');
-      expect(repositoryItems[1].text()).toContain('whisper');
-      expect(repositoryItems[2].text()).toContain('dall-e');
+      expect(repositoryItems[0]?.text()).toContain('gpt-3');
+      expect(repositoryItems[1]?.text()).toContain('whisper');
+      expect(repositoryItems[2]?.text()).toContain('dall-e');
     });
 
     it('renders empty state when no repositories are available', () => {
@@ -185,7 +186,7 @@ describe('RepositoryList', () => {
     });
 
     it('passes correct props to RepositoryItem components', async () => {
-      mockInfiniteScrollReturn.repositories.value = [mockRepositories[0]];
+      mockInfiniteScrollReturn.repositories.value = [mockRepositories[0]!];
 
       wrapper = mount(RepositoryList);
       await nextTick();
@@ -316,7 +317,7 @@ describe('RepositoryList', () => {
 
   describe('Infinite Scroll Integration', () => {
     it('initializes infinite scroll with provided initial repositories', () => {
-      const initialRepos = [mockRepositories[0]];
+      const initialRepos = [mockRepositories[0]!];
       wrapper = mount(RepositoryList, {
         props: {
           initialRepositories: initialRepos,
@@ -381,9 +382,9 @@ describe('RepositoryList', () => {
     it('has proper heading hierarchy', () => {
       wrapper = mount(RepositoryList);
 
-      const mainHeading = wrapper.find('h1');
-      expect(mainHeading.exists()).toBe(true);
-      expect(mainHeading.attributes('id')).toBe('repository-list-title');
+      const screenReaderHeading = wrapper.find('h2#repository-list-title');
+      expect(screenReaderHeading.exists()).toBe(true);
+      expect(screenReaderHeading.classes()).toContain('sr-only');
     });
 
     it('has screen reader only content', () => {
@@ -396,8 +397,8 @@ describe('RepositoryList', () => {
     it('provides proper role attributes', () => {
       wrapper = mount(RepositoryList);
 
-      const main = wrapper.find('[role="main"]');
-      expect(main.exists()).toBe(true);
+      const region = wrapper.find('[role="region"]');
+      expect(region.exists()).toBe(true);
 
       const feed = wrapper.find('[role="feed"]');
       expect(feed.exists()).toBe(true);
@@ -467,7 +468,7 @@ describe('RepositoryList', () => {
     });
 
     it('passes initialRepositories prop to useInfiniteScroll', () => {
-      const initialRepos = [mockRepositories[0], mockRepositories[1]];
+      const initialRepos = [mockRepositories[0]!, mockRepositories[1]!];
 
       wrapper = mount(RepositoryList, {
         props: {
