@@ -1,4 +1,14 @@
-# Nuxt Minimal Starter
+# GitHub Infinite Scroll
+
+A Nuxt 4 application that displays OpenAI's GitHub repositories with infinite scroll functionality.
+
+## Features
+
+- Infinite scroll for seamless browsing experience
+- TypeScript support for type safety
+- ESLint configuration for code quality
+- Responsive design for various screen sizes
+- Error handling and loading states
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
