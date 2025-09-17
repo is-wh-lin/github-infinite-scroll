@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Infinite Scroll - Page Not Found</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background-color: #f6f8fa;
+      color: #24292f;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      padding: 2rem;
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: 600;
+      color: #656d76;
+      margin-bottom: 1rem;
+    }
+
+    .error-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #24292f;
+    }
+
+    .error-message {
+      font-size: 1.125rem;
+      color: #656d76;
+      margin-bottom: 2rem;
+    }
+
+    .home-button {
+      display: inline-block;
+      background-color: #2da44e;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+
+    .home-button:hover {
+      background-color: #2c974b;
+    }
+
+    .home-button:focus {
+      outline: 2px solid #0969da;
+      outline-offset: 2px;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0d1117;
+        color: #f0f6fc;
+      }
+
+      .error-code {
+        color: #8b949e;
+      }
+
+      .error-title {
+        color: #f0f6fc;
+      }
+
+      .error-message {
+        color: #8b949e;
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .error-code {
+        font-size: 4rem;
+      }
+
+      .error-title {
+        font-size: 1.5rem;
+      }
+
+      .error-message {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Page Not Found</h1>
+    <p class="error-message">
+      The page you're looking for doesn't exist or has been moved.
+      Let's get you back to browsing repositories.
+    </p>
+    <a href="/" class="home-button" id="homeButton">
+      Go to Home
+    </a>
+  </div>
+
+  <script>
+    // Client-side routing fallback for GitHub Pages
+    (function () {
+      // Get the current path
+      const path = window.location.pathname;
+      const baseURL = '/';
+
+      // Check if we're on GitHub Pages (path starts with repository name)
+      const isGitHubPages = window.location.hostname.includes('github.io');
+
+      if (isGitHubPages) {
+        // Extract repository name from path for GitHub Pages
+        const pathSegments = path.split('/').filter(Boolean);
+
+        if (pathSegments.length > 0) {
+          // If we have path segments, this might be a client-side route
+          // Redirect to the base URL with the path as a hash for SPA routing
+          const repositoryName = pathSegments[0];
+          const remainingPath = pathSegments.slice(1).join('/');
+
+          if (remainingPath) {
+            // Redirect to index with hash routing for SPA
+            window.location.replace(`/${repositoryName}/#/${remainingPath}`);
+            return;
+          }
+        }
+      }
+
+      // Update home button href to handle base URL correctly
+      const homeButton = document.getElementById('homeButton');
+      if (homeButton && isGitHubPages) {
+        const pathSegments = path.split('/').filter(Boolean);
+        if (pathSegments.length > 0) {
+          homeButton.href = `/${pathSegments[0]}/`;
+        }
+      }
+
+      // Add click handler for better UX
+      homeButton.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Try to use history API for smoother navigation
+        if (window.history && window.history.pushState) {
+          window.history.pushState(null, '', this.href);
+
+          // Trigger a custom event that the SPA can listen to
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        } else {
+          // Fallback to regular navigation
+          window.location.href = this.href;
+        }
+      });
+
+      // Auto-redirect after 5 seconds if user doesn't click
+      setTimeout(function () {
+        if (document.visibilityState === 'visible') {
+          homeButton.click();
+        }
+      }, 5000);
+    })();
+  </script>
+</body>
+
+</html>
