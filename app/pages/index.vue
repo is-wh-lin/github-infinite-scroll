@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onServerPrefetch } from 'vue';
 import type { Repository } from '../../types';
 
 // Define component name for Vue DevTools
@@ -28,58 +29,42 @@ defineOptions({
   name: 'IndexPage',
 });
 
-// SSR-friendly initial data fetch using useAsyncData
-const { data: initialRepositories } = await useAsyncData<Repository[]>(
-  'initial-repositories',
-  async () => {
-    try {
-      // Get runtime config for API configuration
-      const config = useRuntimeConfig();
-      const githubToken = config.public.githubToken || config.githubToken;
+// Initial repositories as a reactive ref
+const initialRepositories = ref<Repository[]>([]);
 
-      // Prepare headers with optional authentication
-      const headers: Record<string, string> = {
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'GitHub-Infinite-Scroll-App',
-      };
+// SSR prefetch without top-level await (linter-friendly)
+onServerPrefetch(async () => {
+  try {
+    const config = useRuntimeConfig();
+    const githubToken = import.meta.server ? config.public.githubToken || config.githubToken : undefined;
 
-      // Add authorization header if token is available
-      if (githubToken) {
-        headers.Authorization = `Bearer ${githubToken}`;
-      }
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(import.meta.server ? { 'User-Agent': 'GitHub-Infinite-Scroll-App' } : {}),
+    };
 
-      // Fetch initial 10 repositories
-      const repositories = await $fetch<Repository[]>('/orgs/openai/repos', {
-        baseURL: config.public.githubApiBaseUrl || 'https://api.github.com',
-        headers,
-        params: {
-          page: 1,
-          per_page: 10,
-          sort: 'created',
-          direction: 'desc',
-          type: 'public',
-        },
-      });
-
-      // Validate and return repositories
-      if (!Array.isArray(repositories)) {
-        throw new Error('Invalid API response format');
-      }
-
-      return repositories;
-    } catch {
-      // Return empty array as fallback to prevent hydration issues
-      // Error will be handled by the error boundary or logged elsewhere
-      return [];
+    if (githubToken && import.meta.server) {
+      headers.Authorization = `Bearer ${githubToken}`;
     }
-  },
-  {
-    // SSR configuration
-    server: true, // Enable server-side rendering
-    default: () => [], // Default value to prevent hydration mismatches
+
+    const repositories = await $fetch<Repository[]>('/orgs/openai/repos', {
+      baseURL: config.public.githubApiBaseUrl || 'https://api.github.com',
+      headers,
+      params: {
+        page: 1,
+        per_page: 10,
+        sort: 'created',
+        direction: 'desc',
+        type: 'public',
+      },
+    });
+
+    initialRepositories.value = Array.isArray(repositories) ? repositories : [];
+  } catch {
+    initialRepositories.value = [];
   }
-);
+});
 
 // Set page metadata with proper SEO
 useHead({

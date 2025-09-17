@@ -5,7 +5,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 
 console.log('🔍 Testing GitHub Pages Configuration...\n');
 
@@ -13,13 +12,11 @@ console.log('🔍 Testing GitHub Pages Configuration...\n');
 console.log('1. Checking required files...');
 const requiredFiles = ['.github/workflows/deploy.yml', 'nuxt.config.ts', 'public/404.html', 'package.json'];
 
-let allFilesExist = true;
 requiredFiles.forEach((file) => {
   if (fs.existsSync(file)) {
     console.log(`   ✅ ${file} exists`);
   } else {
     console.log(`   ❌ ${file} missing`);
-    allFilesExist = false;
   }
 });
 

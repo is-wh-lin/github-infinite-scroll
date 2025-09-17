@@ -132,19 +132,19 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
 
       // Get runtime config for API credentials and environment settings
       const config = useRuntimeConfig();
-      const githubToken = config.public.githubToken || config.githubToken;
-      const rateLimitConfig = config.public.apiRateLimit;
+      const githubToken = import.meta.server ? config.public.githubToken || config.githubToken : undefined;
 
       // Prepare headers with optional authentication
       const headers: Record<string, string> = {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'GitHub-Infinite-Scroll-App',
+        // Only send User-Agent from server to avoid CORS/proxy issues on browsers
+        ...(import.meta.server ? { 'User-Agent': 'GitHub-Infinite-Scroll-App' } : {}),
       };
 
       // Add authorization header if token is available
       // For static sites, avoid using tokens to prevent security issues
-      if (githubToken && process.server) {
+      if (githubToken && import.meta.server) {
         headers.Authorization = `Bearer ${githubToken}`;
       }
 

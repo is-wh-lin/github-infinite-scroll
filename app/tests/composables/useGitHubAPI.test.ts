@@ -29,15 +29,6 @@ const mockUseRuntimeConfig = vi.fn(() => ({
 }));
 vi.stubGlobal('useRuntimeConfig', mockUseRuntimeConfig);
 
-// Mock process.server to simulate server-side environment
-Object.defineProperty(global, 'process', {
-  value: {
-    ...process,
-    server: true,
-  },
-  writable: true,
-});
-
 // Mock repository data
 const mockRepository: Repository = {
   id: 1,
@@ -102,8 +93,6 @@ describe('useGitHubAPI', () => {
         headers: {
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28',
-          'User-Agent': 'GitHub-Infinite-Scroll-App',
-          Authorization: 'Bearer mock-token',
         },
         params: {
           page: 1,
