@@ -144,14 +144,18 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
       };
 
       // Add authorization header if token is available
-      if (githubToken) {
+      // Note: In production (GitHub Pages), token is never exposed to client-side for security
+      if (githubToken && githubToken !== 'ghs_') {
         headers.Authorization = `Bearer ${githubToken}`;
         // Development mode: log token usage for verification
         if (process.env.NODE_ENV === 'development') {
           console.log('🔑 Using GitHub Token for authenticated requests');
         }
-      } else if (process.env.NODE_ENV === 'development') {
-        console.log('ℹ️ Using unauthenticated GitHub API (60 requests/hour limit)');
+      } else {
+        // Production mode: always use unauthenticated requests for GitHub Pages
+        if (process.env.NODE_ENV === 'development') {
+          console.log('ℹ️ Using unauthenticated GitHub API (60 requests/hour limit)');
+        }
       }
 
       // Use GitHub API with authentication when token is available
@@ -186,6 +190,15 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
                 403
               );
             }
+          }
+          // Handle invalid token (401 Unauthorized)
+          if (response.status === 401) {
+            throw createAPIError(
+              {
+                message: 'Invalid or expired token. Using unauthenticated requests.',
+              },
+              401
+            );
           }
         },
       });

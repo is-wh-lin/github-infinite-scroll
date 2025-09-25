@@ -132,9 +132,9 @@ jobs:
           # GitHub API configuration for deployment
           GITHUB_API_BASE_URL: ${{ vars.API_BASE_URL || 'https://api.github.com' }}
 
-          # GitHub token for API access (higher rate limits)
-          # Set this in repository secrets if you want authenticated API access
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || secrets.PERSONAL_ACCESS_TOKEN }}
+          # Note: GITHUB_TOKEN is not used in client-side requests for security reasons
+          # GitHub Pages serves static files, so API calls are made from the browser
+          # Use server-side rendering or API routes if authenticated requests are needed
 
           # GitHub Pages deployment configuration
           NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL || '/github-infinite-scroll' }}
