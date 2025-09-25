@@ -64,28 +64,21 @@ GITHUB_API_BASE_URL=https://api.github.com
 
 #### Production Deployment on GitHub Pages
 
-**Option 1: Unauthenticated Access (Default)**
-- No token required
+**Important Security Note**: For GitHub Pages (static hosting), API requests are made from the client's browser. For security reasons, authentication tokens are never exposed to client-side code in production.
+
+**Current Configuration**: Unauthenticated Access
+- No token required or exposed
 - Rate limit: 60 requests/hour
-- Works for public repositories
+- Works reliably for public repositories
+- Automatic fallback if invalid tokens are detected
 
-**Option 2: Authenticated Access (Higher Rate Limits)**
-For higher API rate limits (5000 requests/hour), set up a personal access token:
+**Why Authenticated Access is Not Available**:
+- GitHub Pages serves static files to browsers
+- API calls happen client-side (in user's browser)
+- Exposing tokens would be a security risk
+- GitHub Actions tokens are not valid for browser-based requests
 
-1. **Create Personal Access Token**:
-   - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
-   - Create new token with `public_repo` scope
-   - Copy the generated token
-
-2. **Add to Repository Secrets**:
-   - Go to Repository → Settings → Secrets and variables → Actions
-   - Add new secret named `PERSONAL_ACCESS_TOKEN`
-   - Paste your personal access token as the value
-
-3. **Benefits**:
-   - Rate limit: 5000 requests/hour (vs 60 for unauthenticated)
-   - More reliable API access
-   - Better performance for heavy usage
+**For Higher Rate Limits**: Consider using server-side rendering (SSR) with a backend service if you need authenticated API access with higher rate limits.
 
 ## Development
 
