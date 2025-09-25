@@ -16,6 +16,9 @@
     }
   ],
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node",
+    "types": ["@types/node"],
     "paths": {
       "@/*": ["./*"]
     }

@@ -132,24 +132,30 @@ export const useGitHubAPI = (): UseGitHubAPIReturn => {
 
       // Get runtime config for API credentials and environment settings
       const config = useRuntimeConfig();
-      const githubToken = import.meta.server ? config.public.githubToken || config.githubToken : undefined;
+      // Use token from public config (available in development) or private config (server-side)
+      const githubToken = config.public.githubToken || config.githubToken;
 
       // Prepare headers with optional authentication
       const headers: Record<string, string> = {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
         // Only send User-Agent from server to avoid CORS/proxy issues on browsers
-        ...(import.meta.server ? { 'User-Agent': 'GitHub-Infinite-Scroll-App' } : {}),
+        ...(typeof window === 'undefined' ? { 'User-Agent': 'GitHub-Infinite-Scroll-App' } : {}),
       };
 
       // Add authorization header if token is available
-      // For static sites, avoid using tokens to prevent security issues
-      if (githubToken && import.meta.server) {
+      if (githubToken) {
         headers.Authorization = `Bearer ${githubToken}`;
+        // Development mode: log token usage for verification
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔑 Using GitHub Token for authenticated requests');
+        }
+      } else if (process.env.NODE_ENV === 'development') {
+        console.log('ℹ️ Using unauthenticated GitHub API (60 requests/hour limit)');
       }
 
-      // Use GitHub API directly without authentication for public repositories
-      // This provides 60 requests per hour per IP address
+      // Use GitHub API with authentication when token is available
+      // Authenticated requests provide 5000 requests per hour, unauthenticated provide 60
       const data = await $fetch<Repository[]>('/orgs/openai/repos', {
         baseURL: config.public.githubApiBaseUrl || 'https://api.github.com',
         headers,

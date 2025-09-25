@@ -162,16 +162,8 @@ export default defineNuxtPlugin(() => {
     });
   };
 
-  // Initialize when the app is mounted
-  onMounted(() => {
-    initializeRouting();
-  });
-
-  // Cleanup on unmount
-  onUnmounted(() => {
-    window.removeEventListener('popstate', handlePopState);
-    document.removeEventListener('click', handleLinkClicks);
-  });
+  // Initialize immediately when plugin loads (client-side only)
+  initializeRouting();
 
   // Provide utilities for components to use
   return {

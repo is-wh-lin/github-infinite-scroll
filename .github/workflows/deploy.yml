@@ -130,12 +130,14 @@ jobs:
           NODE_ENV: ${{ github.event.inputs.environment == 'development' && 'development' || 'production' }}
 
           # GitHub API configuration for deployment
-          # Note: GITHUB_TOKEN not needed for public repository access
           GITHUB_API_BASE_URL: ${{ vars.API_BASE_URL || 'https://api.github.com' }}
+
+          # GitHub token for API access (higher rate limits)
+          # Set this in repository secrets if you want authenticated API access
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || secrets.PERSONAL_ACCESS_TOKEN }}
 
           # GitHub Pages deployment configuration
           NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL || '/github-infinite-scroll' }}
-          NUXT_APP_CDN_URL: ${{ vars.NUXT_APP_CDN_URL || '' }}
 
           # API rate limiting configuration
           GITHUB_API_RATE_LIMIT: ${{ vars.API_RATE_LIMIT || '5000' }}

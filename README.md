@@ -53,7 +53,8 @@ npm install
 
 ### Environment Configuration
 
-The application works without any environment configuration for public repositories. For development with higher API rate limits, you can optionally configure:
+#### Development Setup
+For development with higher API rate limits, you can configure:
 
 ```bash
 # .env (optional)
@@ -61,7 +62,30 @@ GITHUB_TOKEN=your_github_personal_access_token
 GITHUB_API_BASE_URL=https://api.github.com
 ```
 
-**Note**: For production deployment on GitHub Pages, no token is required as the app uses unauthenticated GitHub API access for public repositories.
+#### Production Deployment on GitHub Pages
+
+**Option 1: Unauthenticated Access (Default)**
+- No token required
+- Rate limit: 60 requests/hour
+- Works for public repositories
+
+**Option 2: Authenticated Access (Higher Rate Limits)**
+For higher API rate limits (5000 requests/hour), set up a personal access token:
+
+1. **Create Personal Access Token**:
+   - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Create new token with `public_repo` scope
+   - Copy the generated token
+
+2. **Add to Repository Secrets**:
+   - Go to Repository → Settings → Secrets and variables → Actions
+   - Add new secret named `PERSONAL_ACCESS_TOKEN`
+   - Paste your personal access token as the value
+
+3. **Benefits**:
+   - Rate limit: 5000 requests/hour (vs 60 for unauthenticated)
+   - More reliable API access
+   - Better performance for heavy usage
 
 ## Development
 

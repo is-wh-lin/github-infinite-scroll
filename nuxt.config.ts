@@ -75,9 +75,8 @@ export default defineNuxtConfig({
       // GitHub API configuration for production
       githubApiBaseUrl: process.env.GITHUB_API_BASE_URL || 'https://api.github.com',
 
-      // For static generation, don't expose tokens to client for security
-      // Use server-side API routes instead for authenticated requests
-      githubToken: undefined,
+      // Expose token in development for easier testing, keep undefined in production
+      githubToken: process.env.NODE_ENV === 'development' ? process.env.GITHUB_TOKEN : undefined,
 
       // Base URL for client-side routing and asset paths
       baseURL: process.env.NUXT_APP_BASE_URL || '/',
